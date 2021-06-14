@@ -184,32 +184,30 @@ export default class ScraperService {
 
     // region - Show Info
     private scrapShowName($: cheerio.Root): string {
-        const el = $('div.title_wrapper > h1').html();
-        const name = el.includes('<span') ? el.match(/(.+)<span/)[1] : el.trim();
-        return decode(name).trim();
+        const value = $('h1[class^="TitleHeader"]').text();
+        return decode(value).trim();
     }
 
     private scrapAlternativeName($: cheerio.Root): string {
-        const el = $('div.originalTitle').html();
-        return el ? decode(el.match(/(.+)<span/)[1]) : undefined;
+        const value = $('div[class^="OriginalTitle"]').text().replace('Original title:', '');
+        return decode(value).trim();
     }
 
     private scrapSummary($: cheerio.Root): string {
-        const el = $('div.summary_text').html();
-        return !el || el.includes('<a') ? undefined : decode(el).trim();
+        const value = $('p[class^="GenresAndPlot__Plot"] > span').text();
+        return decode(value).trim();
     }
 
     private scrapDescription($: cheerio.Root): string {
-        const el = $('div#titleStoryLine').find('span:not([class])').html();
-        return el?.includes('|') ? undefined : decode(el).trim();
+        const value = $('div[class^="Storyline__StorylineWrapper"] > div > div > div').html();
+        return value.includes('<span') ? '' : '';
     }
 
     private scrapContentRating($: cheerio.Root): string {
-        const group = $('div.subtext')
-            .html()
-            .trim()
-            .match(/(.+)\n/);
-        return group && !group[1].includes('<a') && !group[1].includes('<time') ? group[1] : undefined;
+        const contentRating = $(
+            'div[class^="TitleBlock__TitleMetaDataContainer"] > ul > li:nth-child(3) > span',
+        ).text();
+        return contentRating.trim();
     }
 
     private scrapYear($: cheerio.Root): number {
